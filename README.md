@@ -211,11 +211,11 @@ node script/1.disassemble.js --retry-lm-fail
 
 ```javascript
 const REPLACEMENTS = [
-  { from: 'トップクルーズ', to: 'オバートリップ' },
-  { from: 'NTT東西', to: 'ABC南北' },
-  { from: 'NTT東', to: 'ABC北' },
-  { from: 'NTT西', to: 'ABC南' },
-  { from: 'NTT', to: 'ABC' },
+  { from: 'クルーズ', to: 'オバートリップ' },
+  { from: 'EFG東西', to: 'ABC南北' },
+  { from: 'EFG東', to: 'ABC北' },
+  { from: 'EFG西', to: 'ABC南' },
+  { from: 'EFG', to: 'ABC' },
   { from: 'トッパンフォームズ', to: 'HHH印刷' },
 ];
 ```
@@ -273,5 +273,5 @@ node script/2.replaceMd.js --input-root ./1.disassemble --output-root ./replaceM
 - **パス長**: Windows の制限対策のため、スライド／章タイトル由来のフォルダー・ファイル名は最大約 60 文字に切り詰めます  
 - **Office 一時ファイル**: `~$` で始まるロックファイルや `Thumbs.db` 等は走査対象外です  
 - **再実行**: 既存出力は基本スキップです。中身をやり直す場合は対象 `.md` を削除するか、フォールバック再変換用の `--retry-lm-fail` を使います  
-- **置換の順序**: `NTT` のような短い語を先に置換すると、`NTT東` などが意図どおり残らないことがあります。長い語から定義してください  
+- **置換の順序**: `EFG` のような短い語を先に置換すると、`EFG東` などが意図どおり残らないことがあります。長い語から定義してください  
 - **スクリプト内の旧パス表記**: `2.replaceMd.js` のコメント例に `helper_script/replaceMd.js` とある場合がありますが、実体は `script/2.replaceMd.js` です  
