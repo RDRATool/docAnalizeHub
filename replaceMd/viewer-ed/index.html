@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ED書 業務フロー関係性ビューア</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="boot">読み込み中…</div>
+
+<header id="top" hidden>
+  <div class="brand">
+    <b>ED書 関係性ビューア</b>
+    <span class="sub">業務フロー中心</span>
+  </div>
+  <nav id="tabs">
+    <button data-view="flow" class="on">業務フロー</button>
+    <button data-view="graph">関係グラフ</button>
+    <button data-view="matrix">マトリクス</button>
+    <button data-view="doc">仕様書</button>
+    <button data-view="check">品質チェック</button>
+  </nav>
+  <div class="tools">
+    <input id="q" type="search" placeholder="検索: 画面名 / バッチID / ファイル / TBL …" autocomplete="off">
+    <label class="chk" title="Excel のふりがなが本文末尾に連結されているため既定で除去する">
+      <input type="checkbox" id="ruby"> ふりがな表示
+    </label>
+    <button id="relToggle" class="mini" title="参照パネルの表示切替">参照 ◧</button>
+  </div>
+</header>
+
+<div id="searchPop" hidden></div>
+
+<main id="main" hidden>
+  <!-- ========== 業務フロー ========== -->
+  <section class="view" data-view="flow">
+    <aside class="pane-l">
+      <div class="pane-hd">
+        <span>業務フロー</span>
+        <select id="flowSort">
+          <option value="group">グループ順</option>
+          <option value="code">ID順</option>
+          <option value="rich">関係の多い順</option>
+        </select>
+      </div>
+      <div id="flowTree" class="tree"></div>
+    </aside>
+    <div class="pane-c">
+      <div id="flowHead"></div>
+      <div class="mapbar">
+        <span class="lbl">関係マップ</span>
+        <label class="chk"><input type="checkbox" id="mapIndirect" checked> 画面・バッチ経由の間接関係も表示</label>
+        <label class="chk"><input type="checkbox" id="mapInferred" checked> 名称一致の推定リンクを含む</label>
+        <span class="spacer"></span>
+        <button id="mapExport" class="mini">SVG保存</button>
+      </div>
+      <div id="flowMap" class="map"></div>
+      <div id="flowBody"></div>
+    </div>
+    <aside class="pane-r" id="flowRel"></aside>
+  </section>
+
+  <!-- ========== 関係グラフ ========== -->
+  <section class="view" data-view="graph" hidden>
+    <aside class="pane-l">
+      <div class="pane-hd"><span>表示フィルタ</span></div>
+      <div class="pane-body">
+        <div class="fgroup"><h4>ノード種別</h4><div id="fNodes"></div></div>
+        <div class="fgroup"><h4>関係種別</h4><div id="fEdges"></div></div>
+        <div class="fgroup">
+          <h4>起点とホップ数</h4>
+          <input id="gFocus" type="search" placeholder="起点を検索（空欄=全体）" autocomplete="off">
+          <div id="gFocusPick" class="pick"></div>
+          <label class="rng">ホップ <input type="range" id="gHops" min="1" max="4" value="2"><b id="gHopsV">2</b></label>
+          <label class="chk"><input type="checkbox" id="gInferred" checked> 推定リンクを含む</label>
+        </div>
+        <div class="fgroup">
+          <h4>操作</h4>
+          <button id="gRelayout" class="mini">再配置</button>
+          <button id="gPng" class="mini">PNG保存</button>
+          <button id="gCsv" class="mini">関係CSV</button>
+          <p class="hint">ドラッグで移動 / ホイールで拡大 / クリックで選択</p>
+        </div>
+      </div>
+    </aside>
+    <div class="pane-c nopad">
+      <canvas id="gCanvas"></canvas>
+      <div id="gStat" class="overlay"></div>
+    </div>
+    <aside class="pane-r" id="graphRel"></aside>
+  </section>
+
+  <!-- ========== マトリクス ========== -->
+  <section class="view" data-view="matrix" hidden>
+    <div class="pane-full">
+      <div class="mapbar">
+        <span class="lbl">業務フロー ×</span>
+        <select id="mxTarget">
+          <option value="screen">画面</option>
+          <option value="batch">バッチ</option>
+          <option value="file">ファイル</option>
+          <option value="table">TBL</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="mxIndirect" checked> 間接関係を含む</label>
+        <label class="chk"><input type="checkbox" id="mxGaps"> 未参照の列だけ表示</label>
+        <span class="spacer"></span>
+        <button id="mxCsv" class="mini">CSV保存</button>
+      </div>
+      <div id="mxWrap" class="mxwrap"></div>
+      <div id="mxInfo" class="mxinfo"></div>
+    </div>
+  </section>
+
+  <!-- ========== 仕様書 ========== -->
+  <section class="view" data-view="doc" hidden>
+    <aside class="pane-l">
+      <div class="pane-hd">
+        <span>仕様書</span>
+        <select id="docArea">
+          <option value="screen">画面仕様</option>
+          <option value="batch">バッチ処理仕様</option>
+          <option value="file">ファイル仕様</option>
+          <option value="flow">詳細業務フロー</option>
+        </select>
+      </div>
+      <input id="docFilter" type="search" placeholder="絞り込み" autocomplete="off">
+      <div id="docTree" class="tree"></div>
+    </aside>
+    <div class="pane-c">
+      <div id="docHead"></div>
+      <div id="docBody"></div>
+    </div>
+    <aside class="pane-r" id="docRel"></aside>
+  </section>
+
+  <!-- ========== 品質チェック ========== -->
+  <section class="view" data-view="check" hidden>
+    <div class="pane-full" id="checkBody"></div>
+  </section>
+</main>
+
+<script src="ed-parser.js"></script>
+<script src="ed-graph-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

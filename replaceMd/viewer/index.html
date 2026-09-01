@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>要件定義書 相互参照ビューア</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand">
+    <span class="brand-mark">◈</span>
+    <span class="brand-name">要件定義書 相互参照ビューア</span>
+    <span id="build-meta" class="brand-meta"></span>
+  </div>
+
+  <nav id="tabs">
+    <button class="tab is-active" data-view="doc">ドキュメント</button>
+    <button class="tab" data-view="graph">参照グラフ</button>
+    <button class="tab" data-view="matrix">トレーサビリティ</button>
+    <button class="tab" data-view="compare">現行↔新</button>
+    <button class="tab" data-view="issues">品質チェック<span id="issue-badge" class="badge"></span></button>
+  </nav>
+
+  <div class="topbar-right">
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="全文検索 / 機能ID (例: 03-01) / フロー名" autocomplete="off" spellcheck="false">
+      <kbd>/</kbd>
+    </div>
+    <button id="nav-back" class="icon-btn" title="戻る">←</button>
+    <button id="nav-fwd" class="icon-btn" title="進む">→</button>
+  </div>
+</header>
+
+<main id="layout">
+
+  <!-- 左ペイン ------------------------------------------------------- -->
+  <aside id="pane-left">
+    <div class="pane-head">
+      <div class="seg" id="left-mode">
+        <button class="seg-btn is-active" data-mode="tree">構成</button>
+        <button class="seg-btn" data-mode="search">検索結果</button>
+        <button class="seg-btn" data-mode="nodes">要素</button>
+      </div>
+    </div>
+    <div id="tree" class="pane-body"></div>
+    <div id="search-results" class="pane-body" hidden></div>
+    <div id="node-list" class="pane-body" hidden></div>
+  </aside>
+
+  <!-- 中央ペイン ----------------------------------------------------- -->
+  <section id="pane-center">
+
+    <!-- ドキュメントビュー -->
+    <div id="view-doc" class="view is-active">
+      <div id="doc-head"></div>
+      <article id="doc-body" class="md"></article>
+    </div>
+
+    <!-- グラフビュー -->
+    <div id="view-graph" class="view">
+      <div id="graph-toolbar" class="toolbar">
+        <label class="field">
+          <span>起点</span>
+          <select id="graph-focus"><option value="">（全体）</option></select>
+        </label>
+        <label class="field">
+          <span>ホップ</span>
+          <select id="graph-hops">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+          </select>
+        </label>
+        <div class="field-group" id="filter-nodes"></div>
+        <div class="field-group" id="filter-edges"></div>
+        <div class="spacer"></div>
+        <label class="field">
+          <span>探索</span>
+          <select id="path-a"><option value="">始点</option></select>
+          <select id="path-b"><option value="">終点</option></select>
+          <button id="path-run" class="btn">経路</button>
+        </label>
+        <button id="graph-relayout" class="btn">再配置</button>
+        <div class="menu-wrap">
+          <button id="graph-export" class="btn">出力 ▾</button>
+          <div class="menu" id="graph-export-menu" hidden>
+            <button data-export="png">PNG 画像</button>
+            <button data-export="svg">SVG 画像</button>
+            <button data-export="mermaid">Mermaid 記法</button>
+            <button data-export="csv">関係一覧 CSV</button>
+          </div>
+        </div>
+      </div>
+      <div id="graph-stage">
+        <canvas id="graph-canvas"></canvas>
+        <div id="graph-hint" class="stage-hint">ドラッグで移動 / ホイールで拡大縮小 / ノードクリックで詳細</div>
+        <div id="graph-tip" class="graph-tip" hidden></div>
+      </div>
+    </div>
+
+    <!-- トレーサビリティマトリクス -->
+    <div id="view-matrix" class="view">
+      <div class="toolbar">
+        <label class="field">
+          <span>対象</span>
+          <select id="matrix-domain">
+            <option value="tpc">オバートリップ（新）</option>
+            <option value="web">媒体Web化</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>軸</span>
+          <select id="matrix-kind">
+            <option value="flow">機能 × 業務フロー</option>
+            <option value="role">機能 × 権限ロール</option>
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" id="matrix-gaps"> 空白行だけ表示</label>
+        <div class="spacer"></div>
+        <button id="matrix-csv" class="btn">CSV 出力</button>
+      </div>
+      <div id="matrix-stage" class="scroll-stage"></div>
+    </div>
+
+    <!-- 現行↔新 対比 -->
+    <div id="view-compare" class="view">
+      <div id="compare-stage" class="scroll-stage"></div>
+    </div>
+
+    <!-- 品質チェック -->
+    <div id="view-issues" class="view">
+      <div class="toolbar">
+        <div class="field-group" id="issue-filter"></div>
+        <div class="spacer"></div>
+        <button id="issues-csv" class="btn">CSV 出力</button>
+      </div>
+      <div id="issues-stage" class="scroll-stage"></div>
+    </div>
+
+  </section>
+
+  <!-- 右ペイン ------------------------------------------------------- -->
+  <aside id="pane-right">
+    <div class="pane-head"><span id="right-title">参照関係</span></div>
+    <div id="relations" class="pane-body"></div>
+  </aside>
+
+</main>
+
+<div id="boot-error" hidden></div>
+
+<script src="config.js"></script>
+<script src="parser.js"></script>
+<script src="graph-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
