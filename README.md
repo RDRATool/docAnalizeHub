@@ -216,7 +216,7 @@ const REPLACEMENTS = [
   { from: 'EFG東', to: 'ABC北' },
   { from: 'EFG西', to: 'ABC南' },
   { from: 'EFG', to: 'ABC' },
-  { from: 'トッパンフォームズ', to: 'HHH印刷' },
+  { from: 'フォーム', to: 'HHH印刷' },
 ];
 ```
 
